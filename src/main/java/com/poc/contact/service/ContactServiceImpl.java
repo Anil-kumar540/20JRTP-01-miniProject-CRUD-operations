@@ -1,5 +1,6 @@
 package com.poc.contact.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +19,7 @@ public class ContactServiceImpl implements ContactService {
 	@Override
 	public String upsert(Contact contact) {
 
+		contact.setActiveStatus("Y");
 		Contact savedContact = contactRepo.saveAndFlush(contact);
 		if (savedContact != null) {
 			return "Contact saved successfully";
@@ -30,7 +32,9 @@ public class ContactServiceImpl implements ContactService {
 
 		Optional<Contact> optionalContact = contactRepo.findById(cid);
 		if (optionalContact.isPresent()) {
-			return optionalContact.get();
+			Contact contact = optionalContact.get();
+			if (contact.getActiveStatus().equals("Y"))
+				return contact;
 		}
 		return null;
 	}
@@ -39,18 +43,29 @@ public class ContactServiceImpl implements ContactService {
 	public List<Contact> getAllContacts() {
 
 		List<Contact> contacts = contactRepo.findAll();
-		return contacts;
+		List<Contact> activeConatcts = new ArrayList<Contact>();
+		for (Contact contact : contacts) {
+			if (contact.getActiveStatus().equals("Y")) {
+				activeConatcts.add(contact);
+			}
+
+		}
+		return activeConatcts;
 	}
 
 	@Override
 	public String deleteContact(int cid) {
-		if (null != this.getContact(cid)) {
-			contactRepo.deleteById(cid);
-			return "deleted successfully";
-		} else {
-			return null;
 
+		Contact contact = this.getContact(cid);
+		if (null != contact) {
+			// contactRepo.deleteById(cid);
+			contact.setActiveStatus("N"); //soft delete
+			Contact entity = contactRepo.saveAndFlush(contact);
+			if (null != entity) {
+				return "deleted successfully";
+			}
 		}
+		return null;
 
 	}
 

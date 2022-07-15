@@ -24,26 +24,31 @@ public class ContactRestController {
 	@PostMapping("/contact")
 	public ResponseEntity<String> createContact(@RequestBody Contact contact) {
 
-		// contactService.upsert(contact);
+		if (null != contactService.upsert(contact)) {
+			return new ResponseEntity<>(contactService.upsert(contact), HttpStatus.CREATED);
+		}
 
-		return new ResponseEntity<>(contactService.upsert(contact), HttpStatus.CREATED);
+		return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@GetMapping("/contact/{cid}")
 	public ResponseEntity<Contact> getContact(@PathVariable("cid") int cid) {
+
 		if (null != contactService.getContact(cid)) {
 			return new ResponseEntity<>(contactService.getContact(cid), HttpStatus.OK);
+
 		}
-		return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 	}
 
 	@GetMapping("/contacts")
 	public ResponseEntity<List<Contact>> getAllContacts() {
+
 		List<Contact> contacts = contactService.getAllContacts();
 		if (!contacts.isEmpty())
 			return new ResponseEntity<>(contacts, HttpStatus.OK);
 		else
-			return new ResponseEntity<>(contacts, HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(contacts, HttpStatus.NOT_FOUND);
 	}
 
 	@DeleteMapping("/contact/{cid}")
@@ -52,7 +57,7 @@ public class ContactRestController {
 		if (null != contactService.getContact(cid))
 			return new ResponseEntity<>(contactService.deleteContact(cid), HttpStatus.OK);
 		else
-			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 	}
 
 }

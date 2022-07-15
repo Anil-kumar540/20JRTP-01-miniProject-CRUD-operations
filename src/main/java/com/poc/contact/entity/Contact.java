@@ -20,5 +20,7 @@ public class Contact {
 	private String email;
 	
 	private long phno;
+	
+	private String activeStatus;
 
 }
